@@ -4,6 +4,7 @@ async function initAuth() {
   const $authButton = document.getElementById('auth-button');
   const $app = document.getElementById("app");
   const $load = document.getElementById("load");
+  const $appTl = document.getElementById('app-tl');
 
   let loaded = false;
   let loginUser = null;
@@ -18,6 +19,10 @@ async function initAuth() {
     loginUser = user;
     if (user) {
       $authButton.innerText = 'Logout';
+      $appTl.style.display = 'flex';
+
+      initPost().catch(showError);
+      initTimeline().catch(showError);
     } else {
       $authButton.innerText = 'Login';
     }
@@ -63,7 +68,7 @@ async function initPost() {
                   location.href = '/404.html';
               }
               const profile = Object.assign({ uid: id }, data);
-              updateProfile(profile);
+              // updateProfile(profile);
           } catch (err) {
               console.warn(err);
               location.href = '/404.html';
@@ -71,7 +76,7 @@ async function initPost() {
           }
       } else {
           $postBox.style.display = '';
-          updateProfile(user);
+          // updateProfile(user);
       }
   }
 
@@ -200,6 +205,11 @@ function getProfilePageId() {
 
 async function main() {
   await initAuth();
+}
+
+function showError(err) {
+  alert(err.message);
+  console.error(err);
 }
 
 document.addEventListener('DOMContentLoaded', function() {
