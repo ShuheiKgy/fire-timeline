@@ -101,7 +101,43 @@ async function initPost() {
           $postButton.disabled = false;
       }
   });
-};
+}
+
+async function createPostEl(doc) {
+  const db = doc.ref.firestore
+  const data = doc.data();
+  const userRef = db.collection('users').doc(data.uid);
+  const tmpl = document.querySelector('#post-template');
+  const $el = document.importNode(tmpl.content, true);
+  const $container = $el.querySelector('div');
+
+  $container.id = 'post-' + doc.id;
+
+  const profileSnap = await userRef.get();
+  const profile = profileSnap.data();
+
+  const $name = $el.querySelector('.name');
+  $name.innerText = profile.name || '';
+  $name.href = `#${profileSnap.id}`
+
+  const $icon = $el.querySelector('.icon');
+  $icon.src = profile.photoURL;
+
+  const $text = $el.querySelector('.text');
+  if (data.text) {
+      $text.innerText = data.text;
+  }
+
+  const $time = $el.querySelector('.time');
+  let created = new Date();
+  if (data.created) {
+      created = data.created.toDate();
+  }
+  $time.innerText = `${created.getFullYear()}/${created.getMonth() + 1}/${created.getDate()} ${created.getHours()}:${created.getMinutes()}`;
+  $container.dataset.created = created.getTime();
+
+  return $el;
+}
 
 function getProfilePageId() {
   const hash = location.hash;
@@ -109,7 +145,7 @@ function getProfilePageId() {
       return;
   }
   return hash.slice(1)
-};
+}
 
 async function main() {
   await initAuth();
