@@ -103,6 +103,14 @@ async function initPost() {
   });
 };
 
+function getProfilePageId() {
+  const hash = location.hash;
+  if (!hash) {
+      return;
+  }
+  return hash.slice(1)
+};
+
 async function main() {
   await initAuth();
 }
