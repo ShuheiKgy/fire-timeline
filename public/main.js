@@ -139,6 +139,57 @@ async function createPostEl(doc) {
   return $el;
 }
 
+async function initTimeline() {
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  const user = auth.currentUser;
+  const userRef = db.collection('users').doc(user.uid);
+  const tlRef = userRef.collection('timeline');
+
+  const $tl = document.getElementById('tl');
+
+  function sortTl() {
+      [].slice.call(document.querySelectorAll('#tl div'))
+          .map(dom => {
+              const value = dom.dataset.created;
+              return { dom, value };
+          })
+          .sort((a, b) => { return b.value - a.value; })
+          .forEach(v => { $tl.appendChild(v.dom); });
+  }
+
+  function subscribeTL() {
+      const uid = getProfilePageId();
+      let ref = tlRef;
+      if (uid) {
+          ref = db.collection('users')
+              .doc(uid)
+              .collection('timeline')
+              .where('uid', '==', uid);
+      }
+      return ref.orderBy('created').limit(50).onSnapshot(async snap => {
+          snap.docChanges().forEach(async change => {
+              if (change.type === 'added') {
+                  const $post = await createPostEl(change.doc);
+                  $tl.insertBefore($post, $tl.firstChild);
+                  sortTl();
+              } else if (change.type === 'removed') {
+                  const $post = $tl.querySelector(`#post-${change.doc.id}`);
+                  $post.parentNode.removeChild($post);
+              }
+          });
+      });
+  };
+
+  let unsubscribe = subscribeTL();
+  window.addEventListener('hashchange', async () => {
+      unsubscribe();
+      $tl.innerText = '';
+      unsubscribe = subscribeTL();
+  });
+}
+
 function getProfilePageId() {
   const hash = location.hash;
   if (!hash) {
