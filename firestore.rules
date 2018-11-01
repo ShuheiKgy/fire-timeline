@@ -1,12 +1,12 @@
 function isProfile(resource) {
-  return resource.keys().hasOnly(['name', 'photoURL']) && // name, photoURLのみ許可 それ以外のフィールドがあればエラーにする。
-    (!('name' in resource.keys()) || (resource.name is string && resource.name.size() <= 50)) && // 名前の長さは５０文字以内に制限
-    (!('photoURL' in resource.keys()) || (resource.photoURL is string && resource.photoURL.matches("^https:[/][/].*"))); // photoURLはhttps:// から始まるデータのみ
+  return resource.keys().hasOnly(['name', 'photoURL']) &&
+    (!('name' in resource.keys()) || (resource.name is string && resource.name.size() <= 50)) &&
+    (!('photoURL' in resource.keys()) || (resource.photoURL is string && resource.photoURL.matches("^https:[/][/].*")));
 }
 
 function isPost(resource) {
   return resource.keys().hasOnly(['uid', 'text', 'created']) && 
-    resource.keys().hasAll(['uid', 'created']) && // uidとcreatedは必須にする
+    resource.keys().hasAll(['uid', 'created']) &&
     resource.uid is string &&
     (!('text' in resource.keys()) || 
       (resource.text is string && 

@@ -33,8 +33,35 @@
   <body>
     <div id="app" style="display: none;">
       <button id="auth-button">Login</button>
+      <div id="app-tl" style="display: none;">
+        <div style="display:flex; flex: 1;flex-direction: column;">
+          <img id="profile-image" style="width:150px;height:150px;">
+          <div><a id="profile-name" href="#"></a></div>
+          <button id="follow-button" style="display:none;margin-right: 20%;">Follow</button>
+        </div>
+        <div style="flex: 2;">
+          <div style="display: flex; flex-direction: column;">
+            <div id="post-box" style="display: flex; flex: 1; flex-direction: column;">
+              <textarea id="post" rows="3" maxlength="140" style="width: 100%;"></textarea>
+              <div style="width: 100%; display: flex; justify-content: flex-end;">
+                <button id="post-button" style="width: 90px; height: 31px;">Send</button>
+              </div>
+            </div>
+            <div id="tl" style="flex: 9;display: flex; flex-direction: column;">
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <p id="load">Loading&hellip;</p>
+
+    <template id="post-template" data-created="">
+      <div>
+        <p><img class="icon" src="" style="width: 30px; height: 30px;"> <a class="name" href="#"></a></p>
+        <p class="text" style="word-wrap: break-word;white-space: pre;margin-left: 15px;"></p>
+        <p class="time" style="text-align: right"></p>
+      </div>
+    </template>
 
     <script src="main.js"></script>
   </body>
