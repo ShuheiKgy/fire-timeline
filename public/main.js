@@ -1,5 +1,7 @@
 async function initAuth() {
   const auth = firebase.auth();
+  const db = firebase.firestore();
+  db.settings({ timestampsInSnapshots: true });
 
   const $authButton = document.getElementById('auth-button');
   const $app = document.getElementById("app");
@@ -21,8 +23,14 @@ async function initAuth() {
       $authButton.innerText = 'Logout';
       $appTl.style.display = 'flex';
 
+      db.collection('users').doc(user.uid).set({
+        name: user.displayName,
+        photoURL: user.photoURL,
+      }).catch(showError);
+
       initPost().catch(showError);
       initTimeline().catch(showError);
+      initProfile().catch(showError);
     } else {
       $authButton.innerText = 'Login';
     }
@@ -202,6 +210,56 @@ function getProfilePageId() {
   }
   return hash.slice(1)
 }
+
+async function initProfile() {
+  const auth = firebase.auth();
+  const user = auth.currentUser;
+  const db = firebase.firestore();
+
+  const $followButton = document.getElementById('follow-button');
+
+  const id = getProfilePageId();
+  if (id) {
+    if (id !== user.uid) {
+      const snap = await db.collection('users').doc(user.uid)
+        .collection('following').doc(id).get();
+      if (snap.exists) {
+        $followButton.disabled = true;
+      }
+    }
+  }
+
+  const onClickFollowButton = async () => {
+    $followButton.disabled = true;
+
+    const id = getProfilePageId();
+    if (id) {
+      const batch = db.batch();
+      const followingRef = db.collection('users')
+        .doc(user.uid)
+        .collection('following')
+        .doc(id);
+      batch.set(followingRef, {
+        created: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      const followersRef = db.collection('users')
+        .doc(id)
+        .collection('followers')
+        .doc(user.uid);
+      batch.set(followersRef, {
+        created: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      await batch.commit();
+    }
+
+    $followButton.disabled = false;
+  }
+  $followButton.addEventListener('click', onClickFollowButton);
+  window.addEventListener('hashchange', async () => {
+    $followButton.disabled = false;
+    $followButton.removeEventListener('click', onClickFollowButton);
+  });
+};
 
 async function main() {
   await initAuth();
