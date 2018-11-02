@@ -23,6 +23,8 @@ async function initAuth() {
       $authButton.innerText = 'Logout';
       $appTl.style.display = 'flex';
 
+      showProfile(user);
+
       db.collection('users').doc(user.uid).set({
         name: user.displayName,
         photoURL: user.photoURL,
@@ -76,7 +78,7 @@ async function initPost() {
                   location.href = '/404.html';
               }
               const profile = Object.assign({ uid: id }, data);
-              // updateProfile(profile);
+              showProfile(profile);
           } catch (err) {
               console.warn(err);
               location.href = '/404.html';
@@ -84,7 +86,7 @@ async function initPost() {
           }
       } else {
           $postBox.style.display = '';
-          // updateProfile(user);
+          showProfile(user);
       }
   }
 
@@ -260,6 +262,24 @@ async function initProfile() {
     $followButton.removeEventListener('click', onClickFollowButton);
   });
 };
+
+function showProfile(user) {
+  const $profileName = document.getElementById('profile-name');
+  const $profileImage = document.getElementById('profile-image');
+  const $followButton = document.getElementById('follow-button');
+
+  const authUser = firebase.auth().currentUser;
+
+  $profileName.href = `#${user.uid}`;
+  $profileName.innerText = user.displayName || user.name || '';
+  $profileImage.src = user.photoURL;
+
+  if (authUser.uid === user.uid) {
+    $followButton.style.display = 'none';
+  } else {
+    $followButton.style.display = '';
+  }
+}
 
 async function main() {
   await initAuth();
